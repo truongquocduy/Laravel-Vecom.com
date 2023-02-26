@@ -1,0 +1,30 @@
+.container-panigation{
+    text-align: center;
+    padding-top: 0;
+    overflow: hidden;
+}
+.panigation ul.primary li, .panigation ul.more li{
+    display: inline-block;
+    list-style: none;
+    width: 30px;
+    height: 30px;
+    background-color: #FFEBB7;
+    text-align: center;
+    text-justify: inter-word;
+    padding: 6px;
+    box-sizing: content-box;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.panigation ul.primary li.active,.panigation ul.primary li:first-child, .panigation ul.primary li:last-child, .panigation ul li:hover  {
+    background-color: var(--background-1);
+    color: aliceblue;
+}
+.panigation ul.more {
+    position: relative;
+    top: 58px;
+    visibility: hidden;
+}
+.panigation ul.more li{
+    position: relative;
+}

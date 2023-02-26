@@ -1,0 +1,107 @@
+#application{
+    display: none;
+}
+
+.loader{
+    width: 300px;
+    position: fixed;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+* {
+    font-family: 'Oswald', sans-serif !important;
+}
+
+:root {
+    --background-primary: #2a2e3f;
+    --background-body: #383d52;
+}
+
+.background-primary {
+    background-color: var(--background-primary);
+}
+
+.background-body {
+    background-color: var(--background-body);
+}
+
+.report-card {
+    border-radius: 6px;
+    display: flex;
+    width: 24%;
+}
+
+.report-card:nth-child(1) {
+    background: linear-gradient(to right, #4ec2f0 0%, rgba(78, 194, 240, 0.5) 100%);
+}
+
+.report-card:nth-child(2) {
+    background: linear-gradient(to left, gold 0%, rgba(56, 202, 179, 0.5) 100%);
+}
+
+.report-card:nth-child(3) {
+    background: linear-gradient(to right, gray 0%, rgb(3 150 101) 100%);
+}
+
+.report-card:nth-child(4) {
+    background: linear-gradient(to right, tomato 0%, rgba(78, 194, 240, 0.5) 100%);
+}
+
+.rounded a {
+    font-size: 16px;
+}
+
+.table-hover tbody tr:hover td {
+    background: rgba(255, 99, 71, 0.247);
+    color: white !important;
+    cursor: pointer;
+}
+.pagination li a {
+    background-color: #2a2e3f !important;
+    color: white !important;
+}
+
+/*css scrollbar*/
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+.removeThumbnail{
+    position: relative;
+    right: -54px;
+    transition: right linear .2s;
+}
+.thumbnailItemArea:hover .removeThumbnail{
+    right: 0;
+}
+.input-primary{
+    border: 1px solid gray;
+    background-color: unset;
+    color:white;
+}
+.input-primary option{
+    color: black;
+}
+.toast {
+    opacity: 1 !important;
+}

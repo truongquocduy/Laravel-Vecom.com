@@ -1,8 +1,7 @@
 @extends('front.layout.layout')
 @section('content')
-<div class="container-fluid" style="margin-top:120px;"  id="app">
-    <!-- <img *ngIf="isLoader" class="loader-image" [src]="'assets/images/products/loader.gif'" alt=""> -->
-    <div class="row justify-content-center">
+<form action="#" @submit="checkout($event)">
+    <div class="row justify-content-center mt-3">
         <div class="col-lg-7 p-3">
             <h4>Chi tiết giỏ hàng</h4>
             <table class="table table-hover">
@@ -23,9 +22,9 @@
                         <td style="vertical-align: middle;"><a class="text-dark" :href="'{{ route('front.product.detail') }}/' + item.slug">@{{ item.name }}</a></td>
                         <td style="vertical-align: middle;">@{{ item.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} VNĐ</td>
                         <td style="vertical-align: middle;width: 150px;">
-                            <button class="btn btn-primary mr-2" @click="changeQuality(item.id,'down')"><strong>-</strong></button>
-                            <button class="btn btn-secondary" disabled><strong>@{{ item.quality }}</strong></button>
-                            <button class="btn btn-primary ml-2" @click="changeQuality(item.id,'up')"><strong>+</strong></button>
+                            <button type="button" class="btn btn-primary mr-2" @click="changeQuality(item.id,'down')"><strong>-</strong></button>
+                            <button type="button" class="btn btn-secondary" disabled><strong>@{{ item.quality }}</strong></button>
+                            <button type="button" class="btn btn-primary ml-2" @click="changeQuality(item.id,'up')"><strong>+</strong></button>
                         </td>
                         <td style="vertical-align: middle;">@{{ (item.price * item.quality).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} VNĐ</td>
                         <td style="vertical-align: middle;"  @click="removeItem(item.id)"><i class="fa-solid fa-trash"
@@ -40,95 +39,103 @@
             </table>
         </div>
         <div class="col-lg-3 p-3" style="border-left: 1px solid rgb(229, 221, 221);">
-            <h4>Địa chỉ nhận hàng</h4>
+            <h5>Địa chỉ nhận hàng</h5>
             <div v-for="item in listAddress" class="form-check">
                 <label class="form-check-label">
-                    <input type="radio" class="form-check-input mt-2" name="address" :checked="item.status">
+                    <input type="radio" class="form-check-input mt-2" name="address" :checked="item.status" :value="item.detail" @change="selectAddressChange(item)">
                     <p class="m-0">@{{ item.detail }}
-                        <code v-show="item.status" class="ml-2 bg-primary text-light pl-2 pr-2">mặc định</code>
-                        <code v-show="!item.status" class="ml-2 bg-warning pl-2 pr-2 text-light" style="cursor: pointer;">chọn làm mặc định</code>
-                        <code>
-                            <i class="fa-solid fa-trash ml-2" data-toggle="tooltip" title="Xóa địa chỉ này!" style="cursor: pointer;"></i>
+                        <code v-show="item.status" class="ms-2 bg-primary text-light ps-2 pe-2">mặc định</code>
+                        <code v-show="!item.status" class="ms-2 bg-warning ps-2 pe-2 text-light" style="cursor: pointer;" @click="selectAddressDefault(item.id)">chọn làm mặc định</code>
+                        <code @click="removeAddress(item.id)">
+                            <i class="fa-solid fa-trash ms-2" data-toggle="tooltip" title="Xóa địa chỉ này!" style="cursor: pointer;"></i>
                         </code>
                     </p>
                     <code>SDT: @{{ item.phone}}</code>
                 </label>
             </div>
-            <button class="btn text-primary" data-toggle="modal" data-target="#editAddress">Thêm địa chỉ mới</button>
+            <button type="button" class="btn text-primary" data-bs-toggle="modal" data-bs-target="#editAddress">Thêm địa chỉ mới</button>
             <!-- <button *ngIf="!showAddress" class="btn p-0"><a class="nav-link p-0" href="#" data-toggle="modal"
                 data-target="#myModal">Nhấn vào đây để đăng nhập</a></button> -->
             <hr>
-            <h4>Phương thức vận chuyển</h4>
+            <h5>Phương thức vận chuyển</h5>
             <div class="form-check">
                 <label class="form-check-label">
-                    <input type="radio" class="form-check-input mt-2" name="transit" v-model="transitFee" value="25000" checked>
-                    <p>Giao hàng tiết kiệm <img src="{{ asset('assets/images/icons/giaotietkiem.webp') }}" width="50px" alt=""></p>
+                    <input type="radio" class="form-check-input mt-2" name="transit_fee" v-model="transitFee" value="25000" checked>
+                    <p>Giao hàng tiết kiệm <img src="{{ asset('assets/images1/icons/giaotietkiem.webp') }}" width="50px" alt=""></p>
                 </label>
             </div>
             <div class="form-check">
                 <label class="form-check-label">
-                    <input type="radio" class="form-check-input" value="40000" v-model="transitFee" name="transit">
-                    <p>Giao hàng nhanh <img src="{{ asset('assets/images/icons/giaohangnhanh.webp') }}" width="50px" alt=""></p>
+                    <input type="radio" class="form-check-input" value="40000" v-model="transitFee" name="transit_fee">
+                    <p>Giao hàng nhanh <img src="{{ asset('assets/images1/icons/giaohangnhanh.webp') }}" width="50px" alt=""></p>
                 </label>
             </div>
             <hr>
-            <h4>Phương thức thanh toán</h4>
+            <h5>Phương thức thanh toán</h5>
             <div class="form-check">
                 <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="paymentMethod" checked>
+                    <input type="radio" class="form-check-input" name="paymentMethod" value="cod" checked>
                     <p>Thanh toán tiền mặt (COD)</p>
                 </label>
             </div>
             <hr>
-            <h6>Giá sản phẩm: @{{ getTotal.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} VNĐ</h6>
-            <h6>Phí vận chuyển: @{{ transitFee.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} VNĐ</h6>
-            <h4>Tổng thanh toán: @{{ (getTotal*1 + transitFee*1).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} VNĐ</h4>
+            <h6>Giá sản phẩm: @{{ ( getTotal / 1000 ).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} K</h6>
+            <h6>Phí vận chuyển: @{{ ( transitFee / 1000 ).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} K</h6>
+            <h5><strong>Tổng thanh toán: @{{ ((getTotal*1 + transitFee*1) / 1000 ).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') }} K</strong></h5>
             <button class="btn btn-outline-success mt-3 w-100">Thanh toán</button>
         </div>
     </div>
-    <div class="modal fade" id="editAddress">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h4>Thêm địa chỉ mới</h4>
-                    <form @submit="newAddress($event)">
-                        <div class="row">
-                            <div class="col-lg-7">
-                                <div class="form-group">
-                                    <select class="form-control" v-model="province_id" name="province_id" @change="getDistrict()">
-                                        <option value="0" selected disabled>Chọn Tỉnh/Thành phố</option>
-                                        <option v-for="item in listProvince" :value="item.province_id"> @{{ item.name }}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <select class="form-control" v-model="district_id" name="district_id" @change="getWard()">
-                                        <option value="0" selected disabled>Chọn Quận/Huyện</option>
-                                        <option v-for="item in listDistrict" :value="item.district_id">@{{ item.name }}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <select class="form-control" v-model="ward_id" name="ward_id">
-                                        <option value="0" selected disabled>Chọn Phường/Xã</option>
-                                        <option v-for="item in listWard" :value="item.wards_id">@{{ item.name }}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <textarea class="form-control" rows="5" v-model="address" id="diachi" placeholder="Số nhà"></textarea>
-                                </div>
+    
+    <input type="hidden" name="totalPrice" :value="getTotal*1 + transitFee*1">
+    <input type="hidden" name="phone" :value="selectPhone">
+    <input type="hidden" name="province_id" :value="province_id_use">
+    <input type="hidden" name="district_id" :value="district_id_use">
+    <input type="hidden" name="ward_id" :value="ward_id_use">
+    <input type="hidden" name="address_use" :value="address_use">
+
+</form>
+<div class="modal fade" id="editAddress">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h4>Thêm địa chỉ mới</h4>
+                <form @submit="newAddress($event)">
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="form-group mt-2">
+                                <select class="form-control" v-model="province_id" name="province_id" @change="getDistrict()">
+                                    <option value="0" selected disabled>Chọn Tỉnh/Thành phố</option>
+                                    <option v-for="item in listProvince" :value="item.province_id"> @{{ item.name }}</option>
+                                </select>
                             </div>
-                            <div class="col-lg-5">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" v-model="phone" placeholder="Số điện thoại">
-                                </div>
-                                <div class="form-group">
-                                    <label for="note">Ghi chú:</label>
-                                    <textarea class="form-control" rows="5" id="note" v-model="note"></textarea>
-                                </div>
-                                <button class="btn btn-outline-success w-100 p-3">Thêm địa chỉ</button>
+                            <div class="form-group mt-2">
+                                <select class="form-control" v-model="district_id" name="district_id" @change="getWard()">
+                                    <option value="0" selected disabled>Chọn Quận/Huyện</option>
+                                    <option v-for="item in listDistrict" :value="item.district_id">@{{ item.name }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group mt-2">
+                                <select class="form-control" v-model="ward_id" name="ward_id">
+                                    <option value="0" selected disabled>Chọn Phường/Xã</option>
+                                    <option v-for="item in listWard" :value="item.wards_id">@{{ item.name }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group mt-2">
+                                <textarea class="form-control" rows="5" v-model="address" id="diachi" placeholder="Số nhà"></textarea>
                             </div>
                         </div>
-                    </form>
-                </div>
+                        <div class="col-lg-5">
+                            <div class="form-group mt-2">
+                                <input type="text" class="form-control" v-model="phone" placeholder="Số điện thoại">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="note">Ghi chú:</label>
+                                <textarea class="form-control" rows="5" id="note" v-model="note"></textarea>
+                            </div>
+                            <button class="btn btn-outline-success w-100 p-3 mt-3">Thêm địa chỉ</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -151,7 +158,13 @@
             listWard: [],
             listCarts: [],
             transitFee: 25000,
-            listAddress: []
+            listAddress: [],
+            selectPhone: "",
+
+            province_id_use: "",
+            district_id_use: "",
+            ward_id_use: "",
+            address_use: "" // số nhà
         },
         methods:{
             getDistrict:function(){
@@ -296,6 +309,61 @@
                 axios.get("{{ route('front.user.address') }}")
                 .then(response =>{
                         this.listAddress = response.data.data
+                        this.getPhone()
+                    }
+                )
+            },
+            checkout: function (event) {
+                if(event) {
+                    event.preventDefault()
+                }
+                const formData = new FormData(event.target);
+                const data = {};
+                formData.forEach((value, key) => (data[key] = value));
+                axios({
+                    method: 'post',
+                    url: "{{ route('front.cart.checkout') }}",
+                    data: data
+                })
+                .then(res => {
+                    if(res.data.status == "000") {
+                        toastr.success("Thành công", res.data.message);
+                        window.location.href = "{{ url('') }}" + '/checkout/' + res.data.order_number
+                    }
+                })
+                .catch(err => {
+                    toastr.warning("Cảnh báo", err.response.data.message);
+                })
+            },
+            getPhone: function () {
+                var addressMain = this.listAddress.filter((element)=> {
+                    return element.status == 1
+                })[0]
+                this.selectPhone = addressMain.phone
+                this.province_id_use = addressMain.province_id
+                this.district_id_use = addressMain.district_id
+                this.ward_id_use = addressMain.ward_id
+                this.address_use = addressMain.address
+            },
+            selectAddressChange: function (item) {
+                this.selectPhone = item.phone
+                this.province_id_use = item.province_id
+                this.district_id_use = item.district_id
+                this.ward_id_use = item.ward_id
+                this.address_use = item.address
+
+            },
+            selectAddressDefault: function (id) {
+                axios.post("{{ url('') }}" + '/user/address/change/default/' + id)
+                .then(response =>{
+                        this.getMyAddress()
+                    }
+                )
+            },
+            removeAddress: function (id) {
+                axios.post("{{ url('') }}" + '/user/address/remove/default/' + id)
+                .then(response =>{
+                        this.getMyAddress()
                     }
                 )
             }

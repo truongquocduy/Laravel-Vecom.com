@@ -1,165 +1,270 @@
 @extends('front.layout.layout')
 @section('content')
-<div class="container-fluid" style="margin-top:120px;" id="app">
-    <div class="row bg-dark p-5" style="background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url({{ asset('assets/images/banners/bannerNam.jpg') }});background-size: 100%;height: 500px;">
-        <div class="col-lg-12 p-5 text-center text-light" >
-            <h3>Sản phẩm</h3>
-            <p>Trang chủ * Sản phẩm * {{ $productTarget->name }}</p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-10 mx-auto" style="margin-top: -200px;background-color: white;">
-            <div class="row pt-3">
-                <div class="col-lg-5 p-5">
-                    <img src="{{ asset('assets/images/products/' . $productTarget->image) }}" alt="" class="w-100">
-
-                    <div class="row p-3">
-                        <div class="col-lg-3 col-3 p-0">
-                            <img src="{{ asset('assets/images/products/' . $productTarget->image) }}" alt="" class="w-100">
-                        </div>
-                        <div class="col-lg-3 col-3 p-0">
-                            <img src="{{ asset('assets/images/products/' . $productTarget->thumbnails) }}" alt="" class="w-100">
-                        </div>
-                        <div class="col-lg-3 col-3 p-0">
-                            <img src="{{ asset('assets/images/products/' . $productTarget->thumbnails) }}" alt="" class="w-100">
-                        </div>
-                        <div class="col-lg-3 col-3 p-0">
-                            <img src="{{ asset('assets/images/products/' . $productTarget->thumbnails) }}" alt="" class="w-100">
-                        </div>
-                    </div>
-
-                </div>
-                <div class="col-lg-7 p-5">
-                    <h3>
-                        {{ $productTarget->name }}
-                    </h3>
-                    <h4 class="mt-4" style="font-weight: 400;">
-                        <strong>{{ number_format($productTarget->price) }}  VNĐ</strong>
-                    </h4>
-                    <p class="mt-4" style="font-weight: 400;">
-                        TÌNH TRẠNG: 
-                        @if($productTarget->instock > 0)
-                            <span class="ms-3 text-success">CÒN HÀNG <img class="mb-1" src="{{ asset('assets/images/icons/checkbox-outline.svg') }}" width="16px" alt=""></span>
-                        @else
-                            <span class="ms-3 text-danger">HẾT HÀNG <i class="fa-solid fa-circle-exclamation"></i></span>
-                        @endif
-                    </p>
-                    
-                    <p class="mt-4" style="font-weight: 400;">
-                        SỐ LƯỢNG: {{ $productTarget->instock }}
-                    </p>
-                    <button class="btn btn-primary mr-2" @click="changeQuality('down')"><strong>-</strong></button>
-                    <button class="btn btn-secondary" disabled><strong>@{{ selectQuality }}</strong></button>
-                    <button class="btn btn-primary ml-2" @click="changeQuality('up')"><strong>+</strong></button>
-
-                    <p class="mt-4" style="font-weight: 400;">
-                        {{ $productTarget->intro }}
-                    </p>
-
-                    <button class="btn text-light p-3 w-100 mt-5" style="background-color: #535353;border-radius: unset;" @click="addCart('{{ $productTarget->id }}')">THÊM VÀO GIỎ HÀNG</button>
-                    <button class="btn btn-outline-success p-3 w-100 mt-2" style="border-radius: unset;">THÊM VÀO MỤC YÊU THÍCH</button>
-
-                    <p class="mt-4" style="font-weight: 400;line-height: 40px;">
-                        GỌI ĐỂ ĐẶT HÀNG: <br>
-                        0369082061
-                    </p>
-
-                    <p class="mt-4" style="font-weight: 400;line-height: 40px;">
-                        <img src="{{ asset('assets/images/icons/share-social-outline.svg') }}" width="20px" alt="">
-                        <span class="ml-2" style="font-weight: 100;font-size: 15px;">Share</span>
-                        <img class="ml-2" src="{{ asset('assets/images/icons/logo-facebook.svg') }}" width="20px" alt="">
-                        <img class="ml-2" src="{{ asset('assets/images/icons/logo-youtube.svg') }}" width="20px" alt="">
-                        <img class="ml-2" src="{{ asset('assets/images/icons/logo-twitter.svg') }}" width="20px" alt="">
-                    </p>
-                </div>
+<div class="row justify-content-center pt-5 pb-5 background-detail">
+    <div class="col-lg-10">
+        <div class="row">
+            <div class="col-lg-10" style="display: flex;">
+                <h4><strong>Shop</strong></h4>
+            </div>
+            <div class="col-lg-2" style="display: flex;">
+                <a href="#" class="len-detail">Home</a>
+                <span class="ms-2 me-2">></span>
+                <a href="#" class="len-detail">Shop</a>
+                <span class="ms-2 me-2">></span>
+                <a href="#" class="len-detail">Detail</a>
             </div>
         </div>
     </div>
-    <div class="row p-5" style="background-color: #f5f3ee;">
-        
-        <div class="col-lg-10 mx-auto">
-            <ul class="nav nav-pills">
+</div>
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-10">
+        <div class="row">
+            <div class="col-lg-4">
+                <img src="{{ asset('assets/images/products/' . $productTarget->image) }}" width="100%" alt="">
+                <div class="thumbnail-area w-100 mt-2">
+                    <img src="{{ asset('assets/images/products/' . $productTarget->image) }}" width="24%" alt="">
+                    @foreach($productTarget->getThumbnail() as $item)
+                    <img src="{{ asset('assets/images/products/' . $item) }}" width="24%" alt="">
+                    @endforeach
+                </div>
+            </div>
+            <div class="col-lg-8 ps-4   ">
+                <h3 class="product-detail-title">{{ $productTarget->name }}</h3>
+                <h5 class="product-price mt-2">
+                    {{ number_format($productTarget->price/1000)  }} K
+
+                    <strike>
+                        @if($productTarget->price != $productTarget->cost) 
+                        {{ number_format($productTarget->cost/1000) }} K 
+                        @endif
+                    </strike>
+                </h5>
+                <div class="product-rating">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="mt-4 product-intro">
+                    {!! $productTarget->intro !!}
+                </p>
+                <div class="btn-change-quality-area mt-4">
+                    <button class="btn btn-outline-secondary rounded-0" @click="changeQuality('down')">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span>
+                        @{{ selectQuality }}
+                    </span>
+                    <button class="btn btn-outline-secondary rounded-0" @click="changeQuality('up')">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="action-area mt-4">
+                    <button class="btn btn-buy rounded-0 mb-2">MUA NGAY</button>
+                    <button class="btn btn-buy rounded-0 mb-2" @click="addCart('{{ $productTarget->id }}')">THÊM VÀO GIỎ HÀNG</button>
+                </div>
+                <div class="product-note mt-4">
+                    Doanh mục: <a href="#">Jacket</a>
+                    <font>,</font><a href="#">Jacket</a>
+                </div>
+                <div class="product-note mt-2">
+                    Tags: <a href="#">Men</a>
+                </div>
+                <div class="product-note mt-2">
+                    Share:
+                    <div class="product-detail-social mt-3">
+                        <span class="s-facebook">
+                            <i class="fa-brands fa-facebook"></i>
+                        </span>
+                        <span class="s-twitter">
+                            <i class="fa-brands fa-twitter"></i>
+                        </span>
+                        <span class="s-google">
+                            <i class="fa-brands fa-google"></i>
+                        </span>
+                        <span class="s-pinterest">
+                            <i class="fa-brands fa-pinterest"></i>
+                        </span>
+                        <span class="s-invision">
+                            <i class="fa-brands fa-invision"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link active" data-toggle="pill" href="#home">Thông tin sản phẩm</a>
+                    <a class="nav-link active" data-bs-toggle="tab" href="#home">Mô tả</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="pill" href="#menu1">Chất liệu</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="pill" href="#menu2">Bình luận</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="pill" href="#menu3">Đánh giá</a>
+                    <a class="nav-link" data-bs-toggle="tab" href="#menu1">Đánh giá</a>
                 </li>
             </ul>
-            
-            <!-- Tab panes -->
             <div class="tab-content">
-                <div class="tab-pane container active" id="home">
-                    <div class="row pt-5">
-                        <div class="col-lg-12" style="min-height: 300px;">
-                            <h2 style="font-weight: 400;">THÔNG TIN SẢN PHẨM</h2>
-                            <p class="mt-2" style="line-height:40px;">
-                                {!! $productTarget->details !!}
-                            </p>
-                            <!-- <iframe width="50%" height="300" src="https://www.youtube.com/embed/dRrAexT9it4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
-                        </div>
-                    </div>
+                <div class="tab-pane container active ps-0 pt-5" id="home">
+                    <p>
+                        {!! $productTarget->details !!}
+                    </p>  
                 </div>
-                <div class="tab-pane container fade" id="menu1">
-                    <div class="row pt-5">
-                        <div class="col-lg-12" style="min-height: 300px;">
-                            <h2 style="font-weight: 400;">CHẤT LIỆU</h2>
-                            <p class="mt-2" style="line-height:40px;">
-                                {!! $productTarget->material !!}
-                            </p>
+                <div class="tab-pane container fade ps-0 pt-5" id="menu1">
+                    <div class="row p-3">
+                        <div class="col-lg-12 comment-item p-3">
+                            <img src="{{ asset('assets/images/logo-icons/comment.jpg') }}" width="60px" style="float:left;" alt="">
+                            <div class="ms-3 w-75" style="float:left;">
+                                <strong>Truong Quoc Duy <i class="fa-solid fa-circle-check text-primary"></i></strong>
+                                <span class="date-comment">- 21 Tháng 2, 2023</span>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <p>
+                                    You can never have enough of a classic, this LBD features a textured knit pattern and adjustable shoulder straps. Aenean luctus vitae felis sed euismod. Integer ornare convallis volutpat. Donec quis erat elementum, auctor erat ac, volutpat dolor.
+                                </p>
+                                <div class="w-100">
+                                    <!-- <span class="btn">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i>
+                                        Trả lời
+                                    </span> -->
+                                    <span class="btn">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i>
+                                        Chỉnh sửa
+                                    </span>
+                                    <span class="btn">
+                                        <i class="fa-solid fa-trash me-1"></i>
+                                        Xóa đánh giá
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            
                         </div>
-                    </div>
-                </div>
-                <div class="tab-pane container fade" id="menu2">
-                    <div class="row pt-5">
-                        <div class="col-lg-12" style="min-height: 300px;">
-                            <h2 style="font-weight: 400;">ĐÁNH GIÁ SẢN PHẨM</h2>
-                            <div class="row mt-4">
-                                <div v-for="item in listComments" class="col-lg-12 bg-light mb-3 ml-3 p-3" style="display:flex;">
-                                    <img src="{{ asset('assets/images/users/duy.jpg') }}" class="rounded" width="80px" height="80px" alt="">
-                                    <div class="ml-3">
-                                        <p><i>
-                                            @{{ item.content  }}
-                                        </i></p> 
-                                        <p><i>
-                                            @{{ item.user_name }}
-                                            <span class="ml-3"> @{{ item.create_At }}</span>
-                                            <span class="ml-3">
-                                                <a href="#"><i class="fa-solid fa-heart"></i> Yêu thích</a>
-                                                <a href="#" class="text-danger ml-3"><i class="fa-solid fa-flag"></i> Báo cáo</a>
-                                            </span>
-                                        </i></p>
-                                    </div>
+                        <div class="col-lg-12 comment-item p-3">
+                            <img src="{{ asset('assets/images/logo-icons/comment.jpg') }}" width="60px" style="float:left;" alt="">
+                            <div class="ms-3 w-75" style="float:left;">
+                                <strong>Truong Quoc Duy <i class="fa-solid fa-circle-check text-primary"></i></strong>
+                                <span class="date-comment">- 21 Tháng 2, 2023</span>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
                                 </div>
-                                <div v-show="listComments.length == 0" class="col-lg-12 text-center p-3">
-                                    <h4>Chưa có bình luận !!!</h4>
+                                <p>
+                                    You can never have enough of a classic, this LBD features a textured knit pattern and adjustable shoulder straps. Aenean luctus vitae felis sed euismod. Integer ornare convallis volutpat. Donec quis erat elementum, auctor erat ac, volutpat dolor.
+                                </p>
+                                <div class="w-100">
+                                    <!-- <span class="btn">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i>
+                                        Trả lời
+                                    </span> -->
+                                    <span class="btn">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i>
+                                        Chỉnh sửa
+                                    </span>
+                                    <span class="btn">
+                                        <i class="fa-solid fa-trash me-1"></i>
+                                        Xóa đánh giá
+                                    </span>
                                 </div>
-                                @if(Auth::check())
-                                    <div class="col-lg-12">
-                                        <form @submit="addComment('{{ $productTarget->id }}',$event)">
-                                            <div class="form-group">
-                                                <textarea class="form-control" rows="5" id="comment" placeholder="Viết bình luận của bạn" v-model="strComment"></textarea>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary float-right pl-4 pr-4" :disabled="!btnComment">Bình luận</button>
-                                            <button type="button" class="btn btn-outline-success float-right pl-4 pr-4 mr-3"><i class="fa-solid fa-image"></i> Kèm hình ảnh</button>
-                                        </form>
-                                    </div>
-                                @endif
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <span class="btn" id="write-comment">
+                                <i class="fa-solid fa-pen-to-square me-1"></i>
+                                Viết đánh giá
+                            </span>
+                        </div>
+                        <div class="col-lg-12 p-3 comment-edit">
+                            <form action="#" @submit="rating($event)">
+                                <div class="mb-2 star-number-area">
+                                    <span class="rating-star" data-rating="1" onclick="selectRatingStar(this)"><i class="fa-solid fa-star" ></i></span>
+                                    <span class="rating-star" data-rating="2" onclick="selectRatingStar(this)"><i class="fa-solid fa-star" ></i></span>
+                                    <span class="rating-star" data-rating="3" onclick="selectRatingStar(this)"><i class="fa-solid fa-star" ></i></span>
+                                    <span class="rating-star" data-rating="4" onclick="selectRatingStar(this)"><i class="fa-solid fa-star" ></i></span>
+                                    <span class="rating-star" data-rating="5" onclick="selectRatingStar(this)"><i class="fa-solid fa-star" ></i></span>
+                                </div>
+                                <label for="comment">Đánh giá của bạn:</label>
+                                <textarea class="form-control" rows="3" id="comment" name="content"></textarea>
+                                <input type="hidden" name="star" id="star-number-hidden" value="0">
+                                <button class="btn rounded-0 mt-3 ps-3 pe-3 text-light" style="background-color: var(--background-2);">GỬI</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="tab-pane container fade" id="menu3">
-                    <div class="row pt-5">
-                        <div class="col-lg-12" style="min-height: 300px;">
-                            <h2 style="font-weight: 400;">ĐÁNH GIÁ SẢN PHẨM</h2>
-                            <p class="mt-2">Sản phẩm đang được cập nhật thông tin</p>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-lg-12 mb-5">
+                <h3 class="mb-4"><font style="font-weight: 1000;">Có thể</font> bạn thích . . .</h3>
+                <div class="owl-carousel owl-carousel-detail owl-theme">
+                    <div class="item">
+                        <div class="product">
+                            <div class="product-image">
+                                <img src="{{ asset('assets/images/products/product1_a.jpg') }}" width="100%" alt="">
+                                <img src="{{ asset('assets/images/products/product1_b.jpg') }}" width="100%" alt="">
+                            </div>
+                            <div class="p-3">
+                                <h5 class="product-title">Hoodie Jacket</h5>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <h5 class="product-price mt-2">
+                                    235K
+                                </h5>
+                                <div class="product-action pt-3">
+                                    <a href="#">
+                                        <i class="fa-solid fa-cart-arrow-down"></i>
+                                        Add to cart
+                                    </a>
+                                    <a href="javascript:">
+                                        <i class="fa-solid fa-book-open-reader"></i>
+                                        Show Detail
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="product">
+                            <div class="product-image">
+                                <img src="{{ asset('assets/images/products/product1_a.jpg') }}" width="100%" alt="">
+                                <img src="{{ asset('assets/images/products/product1_b.jpg') }}" width="100%" alt="">
+                            </div>
+                            <div class="p-3">
+                                <h5 class="product-title">Hoodie Jacket</h5>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <h5 class="product-price mt-2">
+                                    235K
+                                </h5>
+                                <div class="product-action pt-3">
+                                    <a href="#">
+                                        <i class="fa-solid fa-cart-arrow-down"></i>
+                                        Add to cart
+                                    </a>
+                                    <a href="javascript:">
+                                        <i class="fa-solid fa-book-open-reader"></i>
+                                        Show Detail
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -249,6 +354,26 @@
                 else{
                     toastr.warning("Cảnh báo", "Vui lòng nhập bình luận")
                 }
+            },
+            rating: function(event) {
+                if(event) {
+                    event.preventDefault()
+                }
+                if(event.target.star.value == 0) {
+                    $(".star-number-area").addClass('star-number-animation')
+                    toastr.warning("Cảnh báo", "Vui lòng chọn số sao đánh giá")
+                    setTimeout(() => {
+                        $(".star-number-area").removeClass('star-number-animation')
+                    }, 3000);
+                    return
+                }
+                if(event.target.content.value == "") {
+                    toastr.warning("Cảnh báo", "Vui lòng viết đánh giá")
+                    return
+
+                }
+                console.log(event.target.star.value)
+                
             }
 
             
@@ -268,7 +393,6 @@
             .then(response =>{
                     if(response.data.status == "000"){
                         this.listComments = response.data.data
-                        console.log(this.listComments)
                     }
                     else{
                         toastr.error("Lỗi", "Không tải được bình luận")

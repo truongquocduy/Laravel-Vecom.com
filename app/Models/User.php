@@ -20,6 +20,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'token_api',
+        'email_verified',
         'password',
     ];
 
@@ -41,4 +43,39 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function getAddress() {
+        $listAddress = $this->address;
+        if($listAddress === null) {
+            $listAddress = array();
+            return "Chưa cập nhật !!!";
+        }
+        else{
+            $listAddress = unserialize($listAddress);
+        }
+        foreach($listAddress as $item){
+            if($item->status) {
+                $my_province = Province::where('province_id',$item->province_id)->first()->name;
+                $my_district = District::where('district_id',$item->district_id)->first()->name;
+                $my_ward = Ward::where('wards_id',$item->ward_id)->first()->name;
+                return "$item->address, $my_ward, $my_district, $my_province";
+            }
+        }
+    }
+
+    public function getPhonePrimary() {
+        $listAddress = $this->address;
+        if($listAddress === null) {
+            $listAddress = array();
+            return "Chưa cập nhật !!!";
+        }
+        else{
+            $listAddress = unserialize($listAddress);
+        }
+        foreach($listAddress as $item){
+            if($item->status) {
+                return $item->phone;
+            }
+        }
+    }
 }

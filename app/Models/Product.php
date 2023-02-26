@@ -11,7 +11,30 @@ class Product extends Model
     
     protected $fillable = ["*"];
 
-    // public function getImageAttribute($value) {
-    //     return "duy";
-    // }
+    public function getImage2() {
+        $listThumbnail = json_decode($this->thumbnails);
+        if($listThumbnail !== null) {
+            $fileImagePath = public_path() . "/assets/images/products/" . $listThumbnail[0];
+            if(file_exists( $fileImagePath )) {
+                return $listThumbnail[0];
+            }
+            return 'no-product.jpg';
+        }
+        return $this->image;
+    }
+
+    public function getThumbnail() {
+        $listThumbnail = json_decode($this->thumbnails);
+        if($listThumbnail !== null) {
+            return $listThumbnail;
+        }
+        return [];
+    }
+    public function getImageAttribute($value) {
+        $fileImagePath = public_path() . "/assets/images/products/" . $value;
+        if(file_exists( $fileImagePath )) {
+            return $value;
+        }
+        return 'no-product.jpg';
+    } 
 }

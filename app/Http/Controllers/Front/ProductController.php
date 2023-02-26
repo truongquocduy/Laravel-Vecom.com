@@ -5,23 +5,57 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\ProductCategorys;
 use App\Models\User;
 use Auth;
 
 class ProductController extends Controller
 {
+    protected $status;
+
     public function __construct(){
         date_default_timezone_set('Asia/Ho_Chi_Minh');
     }
 
     public function index(Request $request){
-        if (!$request->search) {
-            $products = Product::get();
+        if (!$request->search && !$request->s && !$request->f) {
+            $products = Product::orderBy('id', 'DESC')
+                ->paginate(9);
         }
         else{
-            $products = Product::where('name','like', '%'.$request->search.'%')->get();
+            if($request->s) {
+                if($request->s == 'trends') {
+                    $products = Product::whereColumn('cost', 'price')
+                        ->orderBy('purchased', 'DESC')
+                        ->paginate(9);
+                }
+                elseif ($request->s == 'discounts') {
+                    $products = Product::whereColumn('cost', '<>', 'price')
+                        ->orderBy('purchased', 'DESC')
+                        ->paginate(9);
+                }
+                else {
+                    return abort(404);
+                }
+            }
+            elseif($request->f) {
+                $products = Product::join('product_sub_categorys', 'products.sub_category', '=', 'product_sub_categorys.id')
+                    ->where('product_sub_categorys.slug', $request->f)
+                    ->select(['products.*'])
+                    ->paginate(9);
+            }
+            else{
+                $products = Product::where('name','like', '%'.$request->search.'%')->paginate(9);
+            }
         }
-        return view('front.pages.products',['products'=> $products]);
+        
+        $listCategory = \DB::table('product_categorys')->join('product_sub_categorys', 'product_categorys.id', '=', 'product_sub_categorys.category_id')->select(['product_categorys.name as name', 'product_categorys.slug', 'product_sub_categorys.id','product_sub_categorys.name as subname', 'product_sub_categorys.slug as sub_slug'])->orderBy('product_sub_categorys.category_id', 'ASC')->get();
+
+        $listBuyMost = Product::orderBy('purchased','DESC')
+            ->limit(5)
+            ->get();
+
+        return view('front.pages.products',['products'=> $products->appends(request()->input()), 'listCategory' => $listCategory, 'listBuyMost' => $listBuyMost]);
     }
     public function detail($slug) {
         $productTaret = Product::where('slug',$slug)->first();
@@ -122,5 +156,9 @@ class ProductController extends Controller
             );
         }
         return response()->json($data);
+    }
+
+    public function rating() {
+        dd("duy");
     }
 }

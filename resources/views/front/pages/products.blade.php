@@ -1,64 +1,248 @@
 @extends('front.layout.layout')
+@section('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/front/panigation.css') }}">
+@endsection
 @section('content')
-<div class="container-fluid" style="margin-top:120px;">
-    <div class="row bg-dark p-5"
-        style="background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url({{ asset('assets/images/banners/bannerNam.jpg') }});background-size: 100%;">
-        <div class="col-lg-12 p-5 text-center text-light">
-            <h3>SẢN PHẨM</h3>
-            <p>Trang chủ * Sản phẩm</p>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-12 p-5">
-            <select class="custom-select" style="float: right;width: 300px;" name="" id="hienthi">
-                <option value="macdinh">Thứ tự mặc định</option>
-                <option value="moinhat">Mới nhất</option>
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-lg-10">
+        <div class="row">
+            <div class="col-lg-12" style="display: flex;">
+                <h4><strong>{{ languages('lang022') }}</strong></h4>
+            </div>
+            <div class="col-lg-3 pt-3 pb-3">
+                <form action="#">
+                    <div class="input-group">
+                        <input type="text" class="form-control rounded-0" placeholder="{{ languages('lang023') }}">
+                        <span class="input-group-text search-span">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                    </div>
+                </form>
+                <h5 class="title-category mt-4">
+                    <span></span>
+                    {{ languages('lang025') }}
+                </h5>
+                <ul class="list-category-product mt-2">
+                    @php 
+                        $category_tmp = "";
+                    @endphp
+                    @foreach($listCategory as $category)
+                        @if($category->name != $category_tmp)
+                        <li>
+                            {{ $category->name }}
+                            <i class="fa-solid fa-turn-down button-down"></i>
 
-            </select>
-            <span class="mr-3 mt-2" style="float: right;">Hiện thị một kết quả duy nhất</span>
-        </div>
-        <div class="col-lg-3 p-5">
-            <h6>DANH MỤC</h6>
-            <ul class="w-100 p-4 ul_menu" style="list-style: none;border: 1px solid #ddd; padding: 0;border-radius: 5px;">
-                <li class="p-3">Kem</li>
-                <hr style="margin: 0;">
-                <li class="p-3">Tẩy trang</li>
-                <hr style="margin: 0;">
-                <li class="p-3">Sữa rửa mặt</li>
-                <hr style="margin: 0;">
-                <li class="p-3">Sirum </li>
-                <hr style="margin: 0;">
-                <li class="p-3">Tất cả</li>
-            </ul>
-        </div>
-        <div class="col-lg-9">
-            <div class="row">
-                @if(Request::get('search'))
-                <div class="col-lg-12 p-0 pt-3 pb-3">
-                    <h3><i>Kết quả tìm kiếm: {{ Request::get('search') }}</i></h3>
+                        </li>
+                        <li class="list-category-down">
+                            @foreach($listCategory as $subcategory)
+                            <a href="{{ route('front.product.index').'?f=' . $subcategory->sub_slug }}">{{ ($category->name === $subcategory->name) ? $subcategory->subname : '' }}</a>
+                            @endforeach
+                        </li>
+                        @endif
+
+                        @php 
+                            $category_tmp = $category->name;
+                        @endphp
+                    @endforeach
+                    <!-- <li>
+                        Women
+                        <i class="fa-solid fa-turn-down button-down"></i>
+                    </li>
+                    <li class="list-category-down">
+                        <a href="">Top wear</a>
+                        <a href="">Bottom wear</a>
+                    </li> -->
+                </ul>
+                <h5 class="title-category mt-4">
+                    <span></span>
+                    {{ languages('lang026') }}
+                </h5>
+                <input type="range" class="form-range" min="0" max="100">
+                <button class="btn btn-secondary">{{ languages('lang024') }}</button>
+                <span style="float:right;margin-right: 30px;margin-top: 10px;"><strong>1k -500k</strong></span>
+                <h5 class="title-category mt-4">
+                    <span></span>
+                    {{ languages('lang027') }}
+                </h5>
+                <div class="row">
+                    @foreach($listBuyMost as $product)
+                    <div class="col-lg-12 p-3">
+                        <a href="{{ route('front.product.detail',['slug'=>$product->slug]) }}" class="product-card-mini">
+                            <img src="{{ asset('assets/images/products/' . $product->image) }}" class="w-25" alt="">
+                            <div class="product-card-mini-content ps-3">
+                                <h5>{{ $product->name }}</h5>
+                                <h5 class="product-price mt-2">
+                                    {{ number_format($product->price/1000) }} K 
+                                    <strike>
+                                        @if($product->price != $product->cost) 
+                                        {{ number_format($product->cost/1000) }} K 
+                                        @endif
+                                    </strike>
+                                </h5>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    @endforeach
                 </div>
-                @endif
-                @if(count($products) == 0)
-                <div class="col-lg-12">
-                    <h3 class="text-center">
-                        Sản phẩm không tồn tại !!!
-                    </h3>
+            </div>
+            <div class="col-lg-9 pt-3 pb-3">
+                <div class="row">
+                    <div class="col-lg-12 filter-bar">
+                        <select class="form-select select-product-filter">
+                            <option>Chọn: Mặc định</option>
+                        </select>
+                        <button class="btn btn-secondary ms-3 me-3">{{ languages('lang024') }}</button>
+                        <select class="form-select select-product-filter">
+                            <option>Chọn: Mặc định</option>
+                        </select>
+                    </div>
+                    @if(Request::get('search'))
+                    <h3 class="mt-3 text-end">Kết quả tìm kiếm: {{ Request::get('search') }}</h3>
+                    @endif
+                    @foreach($products as $product)
+                    <div class="col-lg-4 col-6 p-3">
+                        <div class="product">
+                            <div class="product-image">
+                                <img src="{{ asset('assets/images/products/' . $product->image) }}" width="100%" alt="">
+                                <img src="{{ asset('assets/images/products/' . $product->getImage2()) }}" width="100%" alt="">
+                            </div>
+                            <div class="p-3">
+                                <h5 class="product-title">{{ $product->name }}</h5>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <h5 class="product-price mt-2">
+                                    {{ number_format($product->price/1000) }} K 
+                                    <strike>
+                                        @if($product->price != $product->cost) 
+                                        {{ number_format($product->cost/1000) }} K 
+                                        @endif
+                                    </strike>
+                                </h5>
+                                <div class="product-action pt-3">
+                                    <a href="javascript:">
+                                        <i class="fa-solid fa-cart-arrow-down"></i>
+                                        Add to cart
+                                    </a>
+                                    <a href="{{ route('front.product.detail',['slug'=>$product->slug]) }}">
+                                        <i class="fa-solid fa-book-open-reader"></i>
+                                        Show Detail
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                    @if(count($products) == 0)
+                    <div class="col-lg-12">
+                        <h3 class="text-center">Không có sản phẩm</h3>
+                    </div>
+                    @endif
                 </div>
-                @endif
-                @foreach($products as $product)
-                <div class="col-lg-3 col-6 p-0 products">
-                    <img src="{{ asset('assets/images/products/' . $product->image) }}" width="100%" alt="">
-                    <img src="{{ asset('assets/images/products/' . $product->thumbnails) }}" width="100%" alt="">
-                    <div class="products-content" style="position: relative;background-color: white;">
-                        <a class="btn-products" href="{{ route('front.product.detail',['slug'=>$product->slug]) }}"><img src="{{ asset('assets/images/icons/eye-solid.svg') }}"
-                                alt="" style="width: 25px;opacity: 0.8;"></a>
-                        <p class="product-title text-dark">{{ $product->name }}</p>
-                        <p class="product-price text-dark">{{ number_format($product->price) }} VNĐ</p>
+                <div class="row container-panigation justify-content-end">
+                    <div class="col-lg-6">
+                        <div class="panigation">
+                            <ul class="more">
+                                @for($i = 1; $i <= $products->lastPage(); $i++ )
+                                <li><a href="{{ $products->url($i) }}" style="color:inherit;text-decoration:none;">{{ $i }}</a></li>
+                                @endfor
+                            </ul>
+                            <ul class="primary">
+                                <li>
+                                    <a href="{{ ($products->currentPage() != 1) ? $products->url($products->currentPage() - 1) : $products->url(1) }}" style="color:inherit;text-decoration:none;"><i class="fa-solid fa-chevron-left"></i></a>
+                                </li>
+                                <li class="active"><a href="{{ $products->url($products->currentPage()) }}" style="color:inherit;text-decoration:none;">{{ $products->currentPage() }}</a></li>
+                                <li class="more-active">. . .</li>
+                                <li><a href="{{ $products->url($products->lastPage()) }}" style="color:inherit;text-decoration:none;">{{ $products->lastPage() }}</a></li>
+                                <li>
+                                    <a href="{{ ($products->currentPage() != $products->lastPage()) ? $products->url($products->currentPage() + 1) : $products->url($products->currentPage()) }}" style="color:inherit;text-decoration:none;">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                @endforeach
             </div>
         </div>
     </div>
 </div>
+@endsection
+@section('script')
+<script>
+    let quality = $(".more li").length
+    let aboutSpace = $(".more li").outerWidth() + 4
+    let openPanigation = true
+    function supportCSS() {
+        if (quality % 2 == 0) {
+            $(".more").css("left", - aboutSpace/2)
+        }
+        let itemCenter = parseInt(quality/2 + 1);
+        for (let i = 1; i < itemCenter; i++) {
+            $(".more li:nth-child(" + (itemCenter - i) +")").css("left", aboutSpace * i)
+            $(".more li:nth-child(" + (itemCenter + i) +")").css("right", aboutSpace * i)
+            $(".more li:nth-child(" + (itemCenter + i) +")").css("z-index", "-1")
+        }
+    }
+    supportCSS()
+    let itemCenter = parseInt(quality/2 + 1);
+    $(".more-active").click(
+        function(){
+            if(openPanigation){
+                $(".more-active").html('<i class="fa-solid fa-xmark"></i>')
+                $(".panigation > ul.more").css("visibility", "visible")
+                $( ".panigation > ul.more" ).animate({
+                    top: "0px"
+                }, 500, function() {
+                    setTimeout(() => {
+                        for (let i = 1; i < itemCenter; i++) {
+                            $(".more li:nth-child(" + (itemCenter - i) +")").animate({
+                                left: 0
+                            })
+                            $(".more li:nth-child(" + (itemCenter + i) +")").animate({
+                                right: 0
+                            })
+                            $(".more li:nth-child(" + (itemCenter + i) +")").css("z-index", "1")
+                        }
+                        openPanigation = false
+                    }, 40);
+                });
+            }
+            else{
+                $(".more-active").html('. . .')
+                setTimeout(() => {
+                    for (let i = 1; i < itemCenter; i++) {
+                        $(".more li:nth-child(" + (itemCenter - i) +")").animate({
+                            left: aboutSpace * i
+                        })
+                        $(".more li:nth-child(" + (itemCenter + i) +")").animate({
+                            right: aboutSpace * i
+                        }, function(){
+                            $(".more li:nth-child(" + (itemCenter + i) +")").css("z-index", "-1")
+                        })
+                    }
+                }, 40);
+                setTimeout(() => {
+                    $( ".panigation > ul.more" ).animate({
+                        top: "58px"
+                    }, 80 * 10, function(){
+                        $(".panigation > ul.more").css("visibility", "hidden")
+                        openPanigation = true
+                    })
+                },80)
+            }
+        },
+    )
+</script>
 @endsection

@@ -6,9 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 use App\Models\Product;
+use App\Models\Order;
 
 class CartController extends Controller
 {
+    public function __construct(){
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+    }
     public function index(){
         return view('front.pages.carts');
     }
@@ -39,7 +43,7 @@ class CartController extends Controller
                 }
                 $exist_item_carts = array_search($request->product_id,array_column($oldCarts, 'id'));
                 if(count($oldCarts) > 0 ) {
-                    if($existProduct->instock >= ($oldCarts[$exist_item_carts]->quality | 0) + $request->quality && $existProduct->instock > 0){
+                    if($existProduct->instock >= (($exist_item_carts)?$oldCarts[$exist_item_carts]->quality : 0) + $request->quality && $existProduct->instock > 0){
                         if($exist_item_carts !== false) {
                             $oldCarts[$exist_item_carts]->quality += $request->quality;
                         }
@@ -179,5 +183,96 @@ class CartController extends Controller
         }
 
         return response()->json($data);
+    }
+
+    public function checkout(Request $request){
+        $carts = unserialize(Auth::user()->carts);
+        if( count($carts) == 0 ) {
+            return abort(404); //Chuyển quay lại trang mua hàng
+        }
+        //Kiểm tra số lượng cuối cùng
+        $qualityItem = 0;
+        if($carts) {
+            foreach($carts as $item) {
+                $detailItem = Product::findOrFail($item->id);
+                if($detailItem->instock < $item->quality){
+                    dd("Không đủ số lượng");
+                }
+                $qualityItem += $item->quality;
+            }
+        }
+        //Xong bước kiểm tra
+        $user = Auth::user();
+        $newOrder = new Order;
+        $newOrder->user_id = $user->id;
+        do {
+            $order_code = \Str::random(8);
+            $order_number = strtoupper("O".date('Ymd').$order_code);
+        } while (Order::where("order_number", "=", $order_number)->first() instanceof User);
+        $newOrder->order_number = $order_number;
+        $newOrder->carts = $user->carts;
+        $newOrder->quality = $qualityItem;
+        $newOrder->status = "Pending";
+        $newOrder->payment_status = 0; // 0 là trang thái unpaid
+        $newOrder->payment_method = $request->paymentMethod;
+        $newOrder->address = $request->address;
+        $newOrder->province_id = $request->province_id;
+        $newOrder->district_id = $request->district_id;
+        $newOrder->ward_id = $request->ward_id;
+        $newOrder->apartment_number = $request->address_use;
+        $newOrder->phone = $request->phone;
+        $newOrder->total_price = $request->totalPrice;
+        $newOrder->transit_method = ($request->transit_fee == 25000) ? "GHTK" : "GHN";
+        $newOrder->transit_fee = $request->transit_fee;
+        $today = date('Y-m-d');
+        $newOrder->delivery_date = ($request->transit == 25000) ? date('Y-m-d', strtotime($today. ' + 5 days')) : date('Y-m-d', strtotime($today. ' + 3 days'));
+        $newOrder->save();
+
+        // Cập nhật lại số lượng sản phẩm
+        if($carts) {
+            foreach($carts as $item) {
+                $detailItem = Product::findOrFail($item->id);
+                $detailItem->instock -= $item->quality;
+                $detailItem->purchased += $item->quality;
+                $detailItem->save();
+            }
+        }
+        //clear giỏ hàng
+        $user->carts = serialize(array());
+        $user->save();
+        $response = [
+            'code' => 201,
+            'status' => "000",
+            'message' => "Thanh toán thành công",
+            'order_number' => $order_number
+        ];
+        return response()->json($response,$response['code']);
+    }
+
+    public function resultTemplate($order_number) {
+        $orderTarget = Order::where('order_number', $order_number)->first();
+        if( !$orderTarget ) {
+            return abort(404);
+        }
+        if( Auth::check() ) {
+            if( Auth::user()->id == $orderTarget->user_id) {
+                $carts = unserialize($orderTarget->carts);
+                $listCarts = array();
+                if($carts) {
+                    foreach($carts as $item) {
+                        $detailItem = Product::findOrFail($item->id);
+                        if($detailItem){
+                            $detailItem['quality'] = $item->quality;
+                            array_push($listCarts,$detailItem);
+                        }
+                    }
+                }
+                return view('front.pages.carts.result-checkout',['orderTarget' => $orderTarget, 'user' => Auth::user(), 'listCarts' => $listCarts]);
+            }
+            return "Bạn không thể xem hóa đơn của người khác!!!";   
+        }
+        else {
+            return "Vui lòng đăng nhập để xem !!!";
+        }
     }
 }
